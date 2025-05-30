@@ -116,32 +116,43 @@ class DropDownWithTopOptions(Dropdown):
     return []
 
   @classmethod
-  def get_ordered_items(cls):
-    list_as_dic = dict(sorted(cls.as_list()))
+  def get_sorted_items_list(cls,items):
+    return dict(sorted(items))
+
+  @classmethod
+  def get_split_items(cls):
     top_items = cls.get_top_elements_keys()
-    top_elements_values = []
-    rest_of_langs_dic = []
-    for key, value in list_as_dic.items():
+    top_elements_items = []
+    rest_of_elements_items = []
+    for key, value in cls.get_sorted_items_list(cls.as_list()).items():
       if key in top_items:
-        top_elements_values.insert(top_items.index(key),(key,value))
+        top_elements_items.insert(top_items.index(key),(key,value))
       else:
-        rest_of_langs_dic.append((key,value))
-    result = top_elements_values+rest_of_langs_dic
-    return result
+        rest_of_elements_items.append((key,value))
+
+    return top_elements_items,rest_of_elements_items
+
+  @classmethod
+  def format_item(cls,item,disabled=False):
+    if disabled:
+      return f"        {item[1]}"
+    else:
+      return f"  {item[0]} => {item[1]}"
+
+
+  @classmethod
+  def render_formated_items(cls,items):
+    for item in items:
+      print(cls.format_item(item,item[0] in cls.get_disabled_keys()))
 
   @classmethod
   def render(cls):
-    items_count=0
     print (f"{cls.INPUT_NAME}:")
-    for key, value in cls.get_ordered_items():
-      if 0 < len(cls.get_top_elements_keys()) == items_count: #separator automatic displaying condition
-        print ("         ----")
-      if key in cls.get_disabled_keys(): # disabled itemts displaying cond
-        print (f"        {value}")
-      else:
-        print (f"  {key} => {value}")
-      items_count+=1 # counting items to display separator
-
+    top_elements_items,rest_of_elements_items = cls.get_split_items()
+    if len(top_elements_items) > 0:
+      cls.render_formated_items(top_elements_items)
+      print ("         ----")
+    cls.render_formated_items(rest_of_elements_items)
 
 #--DATA-COMPONENTS/------------------------------
 class ExampleTitle(PageTitle):
