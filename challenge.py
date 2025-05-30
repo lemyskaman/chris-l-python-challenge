@@ -1,9 +1,48 @@
+from platform import architecture
+
+#-- Lemys Lopez General Comments--
+#
+# After inspection fo the challenge class layers i can fell a subset of the  django arhitecute style
+# knowing tha django is MVT (model, view, template), i ve found similary with the view layer of MVT, also we have here
+# the data componetns layer that smeels like the template side of mvt.
+#
+# Being said so and also knowing that there is always ad new way to obtimize a system, for this hypothetical constrained
+# case i ve impleted the best SOLID principles techniques to improve the code to adapt to the new requirements.
+#
+# Q1: WHY DID YOU CREATE A NEW COMPONENT IN THE VISUAL LAYER FOR SEPARATED DROPDOWN? :
+#
+# A: Well as the new requirement state that top elements are need in the language dropdown. IF this requirement where
+# unique only for one drop down (as a not replated behaviur in othe dorp downs) i considre ok that the functionality and
+# logic for top elments hapens in a single component of the DTATA COMPONENTS LAYER.
+#
+# But situations is that the behaviur need to be replicated ind a secound laguage dropdown with diferent elements at the
+# top.
+#
+# So i ve created a new component that inherits from the Dropdown class (DropDownWithTopOptions) and any component that
+# extends form it will inherit the top elements functionality
+#
+# Q2: THEM WHY DIDNT YOU MODIFIED THE ALREADY EXISTAND ONE (Dropdown)?:
+#
+# A2: As the way ive implemented the new top elements functionality, required to modify the component rendering logic
+# and also as this new component rendering logic dependes of other methods data returns as input, In my experience the
+# safest way to keep the BACKWARDS COMPAITBILTY with odther components that might be extending the Dropdown is to create
+# a new class (DropDownWithTopOptions) extending from Dropdown, Overwriting the redering logic with everithing else.
+#
+# Q3: WHY DropDownWithTopOptions HVE DISABLED ITEMS FUNCTIOANLITY WHEN IT WAS NOT EXPLICIT REQUIRED ?
+#
+# A3: In the interview a susgestion form intervierwr was to handle the separator was to treat it as a disabled item, with
+# my last improovemnt at the render method of the DropDownWithTopOptions does not need that childrens specify the
+# separator as disabled item EVENTHOUG is a nice feature so i decided to keep it
+
+
+
+
+
+
 #--CONFIG/------------------------
 # NOTE: Settings are loaded from an external secret manager when deployed.
 #       Values here are only for testing.
 class SettingsImporter ():
-
-
 
   LANGUAGES = [
     ('ar', 'Arabic'),
@@ -67,42 +106,42 @@ class Dropdown(Component):
 #    return top_list + divider + rest
 
 
-class SeparatedDropdown(Dropdown):
+class DropDownWithTopOptions(Dropdown):
 
   @classmethod
-  def get_top_elements(cls):
+  def get_top_elements_keys(cls):
+    return []
+
+  @classmethod
+  def get_disabled_keys(cls):
     return []
 
   @classmethod
   def get_ordered_items(cls):
     list_as_dir = dict(sorted(cls.as_list()))
-    top_items = cls.get_top_elements()
+    top_items = cls.get_top_elements_keys()
     top_elements_values = []
-    rest_of_langs_dic = {}
+    rest_of_langs_dic = []
     for key, value in list_as_dir.items():
       if key in top_items:
         top_elements_values.insert(top_items.index(key),(key,value))
       else:
-        rest_of_langs_dic[key] = value
-    result = top_elements_values+[("-","---")]+list(rest_of_langs_dic.items())
+        rest_of_langs_dic.append((key,value))
+    result = top_elements_values+rest_of_langs_dic
     return result
-
-
-
-
-  @classmethod
-  def get_disableds(cls):
-    return []
-
 
   @classmethod
   def render(cls):
+    items_count=0
     print (f"{cls.INPUT_NAME}:")
     for key, value in cls.get_ordered_items():
-      if key in cls.get_disableds():
+      if 0 < len(cls.get_top_elements_keys()) == items_count: #separator automatic displaying condition
+        print ("         ----")
+      if key in cls.get_disabled_keys(): # disabled itemts displaying cond
         print (f"        {value}")
       else:
         print (f"  {key} => {value}")
+      items_count+=1 # counting items to display separator
 
 
 #--DATA-COMPONENTS/------------------------------
@@ -116,38 +155,8 @@ class GenderDropdown(Dropdown):
   def as_list(cls):
     return [('M', 'Male'), ('F', 'Female')]
 
-class LangDropdown(Dropdown):
-  INPUT_NAME = 'Language'
 
-  @classmethod
-  def get_disableds(cls):
-    return ["-"]
-
-  @classmethod
-  def get_ordered_items(cls):
-    list_as_dir = dict(sorted(cls.as_list()))
-    top_items = cls.get_top_elements()
-    top_elements_values = []
-    rest_of_langs_dic = {}
-    for key, value in list_as_dir.items():
-      if key in top_items:
-        top_elements_values.insert(top_items.index(key),(key,value))
-      else:
-        rest_of_langs_dic[key] = value
-    result = top_elements_values+[("-","---")]+list(rest_of_langs_dic.items())
-    return result
-
-  @classmethod
-  def as_list(cls):
-    # return SettingsImporter.LANGUAGES
-    return cls.get_ordered_lang_items()
-
-
-
-
-
-
-class LangDropdownSeparated(SeparatedDropdown):
+class LangDropdownSeparated(DropDownWithTopOptions):
   INPUT_NAME = 'Language1'
 
   @classmethod
@@ -156,18 +165,11 @@ class LangDropdownSeparated(SeparatedDropdown):
 
 
   @classmethod
-  def get_top_elements(cls):
+  def get_top_elements_keys(cls):
     return ['en', 'sp', 'fr']
 
-  @classmethod
-  def get_disableds(cls):
-    return ["-"]
 
-
-
-
-
-class LangDropdownSeparated2(SeparatedDropdown):
+class LangDropdownSeparated2(DropDownWithTopOptions):
   INPUT_NAME = 'Language2'
 
   @classmethod
@@ -175,19 +177,30 @@ class LangDropdownSeparated2(SeparatedDropdown):
     return SettingsImporter.LANGUAGES
 
   @classmethod
-  def get_top_elements(cls):
+  def get_top_elements_keys(cls):
     return ['de','fr']
 
+
+
+class LangDropdownSeparated3(DropDownWithTopOptions):
+  INPUT_NAME = 'Language With Disabled'
+
   @classmethod
-  def get_disableds(cls):
-    return ["-"]
+  def as_list(cls):
+    return SettingsImporter.LANGUAGES
+
+  @classmethod
+  def get_top_elements_keys(cls):
+    return ['de','fr']
 
 
-
+  @classmethod
+  def get_disabled_keys(cls):
+    return ["sp"]
 
 #--MAIN---------------------------------
 
-components = [ExampleTitle, GenderDropdown, LangDropdownSeparated, LangDropdownSeparated2]
+components = [ExampleTitle, GenderDropdown, LangDropdownSeparated, LangDropdownSeparated2, LangDropdownSeparated3]
 TemplateRenderer(components).render_page()
 
 
