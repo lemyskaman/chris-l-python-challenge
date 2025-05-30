@@ -117,11 +117,11 @@ class DropDownWithTopOptions(Dropdown):
 
   @classmethod
   def get_ordered_items(cls):
-    list_as_dir = dict(sorted(cls.as_list()))
+    list_as_dic = dict(sorted(cls.as_list()))
     top_items = cls.get_top_elements_keys()
     top_elements_values = []
     rest_of_langs_dic = []
-    for key, value in list_as_dir.items():
+    for key, value in list_as_dic.items():
       if key in top_items:
         top_elements_values.insert(top_items.index(key),(key,value))
       else:
