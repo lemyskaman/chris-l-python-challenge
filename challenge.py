@@ -1,5 +1,4 @@
 from platform import architecture
-
 #-- Lemys Lopez General Comments--
 #
 # After inspection fo the challenge class layers i can fell a subset of the  django arhitecute style
@@ -157,7 +156,7 @@ class GenderDropdown(Dropdown):
 
 
 class LangDropdownSeparated(DropDownWithTopOptions):
-  INPUT_NAME = 'Language1'
+  INPUT_NAME = 'Languages DropDown with top elements '
 
   @classmethod
   def as_list(cls):
@@ -170,7 +169,7 @@ class LangDropdownSeparated(DropDownWithTopOptions):
 
 
 class LangDropdownSeparated2(DropDownWithTopOptions):
-  INPUT_NAME = 'Language2'
+  INPUT_NAME = 'Languages DropDown with others top elements'
 
   @classmethod
   def as_list(cls):
@@ -183,7 +182,7 @@ class LangDropdownSeparated2(DropDownWithTopOptions):
 
 
 class LangDropdownSeparated3(DropDownWithTopOptions):
-  INPUT_NAME = 'Language With Disabled'
+  INPUT_NAME = 'Language With Disabled elemets'
 
   @classmethod
   def as_list(cls):
